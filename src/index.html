@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Recommendation Assistant</title>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Main layout */
+        .main {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+        }
+
+        /* LEFT PANEL */
+        .form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* RIGHT PANEL */
+        .results-container {
+            width: 350px;
+        }
+
+        .results-container h3 {
+            text-align: left;
+        }
+
+        .card {
+            background: white;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .car-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .reason {
+            color: #555;
+            margin-top: 4px;
+        }
+
+    </style>
+
+
+</head>
+
+<body>
+
+<h2>🚗 Car Recommendation Assistant</h2>
+
+<div class="main">
+
+
+    <!-- LEFT: FORM -->
+    <div class="form-container">
+
+        <div class="form-group">
+            <label>Budget (in lakhs)</label>
+            <input type="number" id="budget" placeholder="e.g. 10">
+        </div>
+
+        <div class="form-group">
+            <label>Fuel Type</label>
+            <select id="fuel">
+                <option value="petrol">Petrol</option>
+                <option value="diesel">Diesel</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Priority</label>
+            <select id="priority">
+                <option value="mileage">Mileage</option>
+                <option value="safety">Safety</option>
+            </select>
+        </div>
+
+        <button type="button" onclick="getRecommendation()">Find Cars</button>
+
+    </div>
+
+    <div class="results-container" id="resultsSection" style="display: none;">
+        <h3>Top Recommendations</h3>
+        <div id="results"></div>
+    </div>
+
+
+</div>
+
+<script>
+    async function getRecommendation() {
+
+    const data = {
+        budget: document.getElementById("budget").value,
+        fuel: document.getElementById("fuel").value,
+        priority: document.getElementById("priority").value
+    };
+
+    const res = await fetch("http://localhost:8080/recommend", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+const container = document.getElementById("results");
+const section = document.getElementById("resultsSection");
+
+container.innerHTML = "";
+section.style.display = "block";
+
+if (result.note) {
+    const note = document.createElement("p");
+    note.style.color = "#ff9800";
+    note.style.fontWeight = "bold";
+    note.innerText = result.note;
+    container.appendChild(note);
+}
+
+result.cars.forEach(car => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+        <div class="car-name">${car.name}</div>
+        <div class="reason">${car.reason}</div>
+    `;
+
+    container.appendChild(card);
+});
+}
+</script>
+
+</body>
+</html>
